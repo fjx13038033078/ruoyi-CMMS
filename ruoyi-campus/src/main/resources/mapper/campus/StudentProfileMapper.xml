@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.campus.mapper.StudentProfileMapper">
+
+	<resultMap type="StudentProfile" id="StudentProfileResult">
+		<id     property="profileId"     column="profile_id"     />
+		<result property="userId"        column="user_id"        />
+		<result property="studentNo"     column="student_no"     />
+		<result property="cardImage"     column="card_image"     />
+		<result property="authStatus"    column="auth_status"    />
+		<result property="auditRemark"   column="audit_remark"   />
+		<result property="creditScore"   column="credit_score"   />
+		<result property="isRunner"      column="is_runner"      />
+		<result property="createTime"    column="create_time"    />
+		<result property="updateTime"    column="update_time"    />
+		<result property="userName"      column="user_name"      />
+	</resultMap>
+
+	<sql id="selectStudentProfileVo">
+		select p.profile_id, p.user_id, p.student_no, p.card_image, p.auth_status,
+		       p.audit_remark, p.credit_score, p.is_runner, p.create_time, p.update_time,
+		       u.nick_name as user_name
+		from campus_student_profile p
+		left join sys_user u on p.user_id = u.user_id
+	</sql>
+
+	<select id="selectStudentProfileList" parameterType="StudentProfile" resultMap="StudentProfileResult">
+		<include refid="selectStudentProfileVo"/>
+		<where>
+			<if test="userId != null">
+				AND p.user_id = #{userId}
+			</if>
+			<if test="studentNo != null and studentNo != ''">
+				AND p.student_no like concat('%', #{studentNo}, '%')
+			</if>
+			<if test="authStatus != null and authStatus != ''">
+				AND p.auth_status = #{authStatus}
+			</if>
+			<if test="isRunner != null and isRunner != ''">
+				AND p.is_runner = #{isRunner}
+			</if>
+			<if test="userName != null and userName != ''">
+				AND u.nick_name like concat('%', #{userName}, '%')
+			</if>
+		</where>
+		order by p.create_time desc
+	</select>
+
+	<select id="selectStudentProfileById" parameterType="Long" resultMap="StudentProfileResult">
+		<include refid="selectStudentProfileVo"/>
+		where p.profile_id = #{profileId}
+	</select>
+
+	<select id="selectStudentProfileByUserId" parameterType="Long" resultMap="StudentProfileResult">
+		<include refid="selectStudentProfileVo"/>
+		where p.user_id = #{userId}
+	</select>
+
+	<select id="checkStudentNoUnique" parameterType="String" resultMap="StudentProfileResult">
+		select p.profile_id, p.user_id, p.student_no
+		from campus_student_profile p
+		where p.student_no = #{studentNo} limit 1
+	</select>
+
+	<select id="checkUserIdUnique" parameterType="Long" resultMap="StudentProfileResult">
+		select p.profile_id, p.user_id
+		from campus_student_profile p
+		where p.user_id = #{userId} limit 1
+	</select>
+
+	<insert id="insertStudentProfile" parameterType="StudentProfile" useGeneratedKeys="true" keyProperty="profileId">
+		insert into campus_student_profile(
+			<if test="userId != null">user_id,</if>
+			<if test="studentNo != null and studentNo != ''">student_no,</if>
+			<if test="cardImage != null and cardImage != ''">card_image,</if>
+			<if test="authStatus != null and authStatus != ''">auth_status,</if>
+			<if test="auditRemark != null and auditRemark != ''">audit_remark,</if>
+			<if test="creditScore != null">credit_score,</if>
+			<if test="isRunner != null and isRunner != ''">is_runner,</if>
+			create_time
+		)values(
+			<if test="userId != null">#{userId},</if>
+			<if test="studentNo != null and studentNo != ''">#{studentNo},</if>
+			<if test="cardImage != null and cardImage != ''">#{cardImage},</if>
+			<if test="authStatus != null and authStatus != ''">#{authStatus},</if>
+			<if test="auditRemark != null and auditRemark != ''">#{auditRemark},</if>
+			<if test="creditScore != null">#{creditScore},</if>
+			<if test="isRunner != null and isRunner != ''">#{isRunner},</if>
+			sysdate()
+		)
+	</insert>
+
+	<update id="updateStudentProfile" parameterType="StudentProfile">
+		update campus_student_profile
+		<set>
+			<if test="studentNo != null">student_no = #{studentNo},</if>
+			<if test="cardImage != null">card_image = #{cardImage},</if>
+			<if test="authStatus != null and authStatus != ''">auth_status = #{authStatus},</if>
+			<if test="auditRemark != null">audit_remark = #{auditRemark},</if>
+			<if test="creditScore != null">credit_score = #{creditScore},</if>
+			<if test="isRunner != null and isRunner != ''">is_runner = #{isRunner},</if>
+			update_time = sysdate()
+		</set>
+		where profile_id = #{profileId}
+	</update>
+
+	<delete id="deleteStudentProfileById" parameterType="Long">
+		delete from campus_student_profile where profile_id = #{profileId}
+	</delete>
+
+	<delete id="deleteStudentProfileByIds" parameterType="Long">
+		delete from campus_student_profile where profile_id in
+		<foreach collection="array" item="profileId" open="(" separator="," close=")">
+			#{profileId}
+		</foreach>
+	</delete>
+
+</mapper>

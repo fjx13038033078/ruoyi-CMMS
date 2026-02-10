@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.campus.mapper.CreditLogMapper">
+
+	<resultMap type="CreditLog" id="CreditLogResult">
+		<id     property="logId"         column="log_id"         />
+		<result property="userId"        column="user_id"        />
+		<result property="changeType"    column="change_type"    />
+		<result property="scoreChange"   column="score_change"   />
+		<result property="currentScore"  column="current_score"  />
+		<result property="refOrderId"    column="ref_order_id"   />
+		<result property="createTime"    column="create_time"    />
+		<result property="userName"      column="user_name"      />
+		<result property="orderNo"       column="order_no"       />
+	</resultMap>
+
+	<sql id="selectCreditLogVo">
+		select l.log_id, l.user_id, l.change_type, l.score_change, l.current_score,
+		       l.ref_order_id, l.create_time,
+		       u.nick_name as user_name,
+		       o.order_no as order_no
+		from campus_credit_log l
+		left join sys_user u on l.user_id = u.user_id
+		left join campus_errand_order o on l.ref_order_id = o.order_id
+	</sql>
+
+	<select id="selectCreditLogList" parameterType="CreditLog" resultMap="CreditLogResult">
+		<include refid="selectCreditLogVo"/>
+		<where>
+			<if test="userId != null">
+				AND l.user_id = #{userId}
+			</if>
+			<if test="changeType != null and changeType != ''">
+				AND l.change_type = #{changeType}
+			</if>
+			<if test="refOrderId != null">
+				AND l.ref_order_id = #{refOrderId}
+			</if>
+			<if test="userName != null and userName != ''">
+				AND u.nick_name like concat('%', #{userName}, '%')
+			</if>
+			<if test="params.beginTime != null and params.beginTime != ''">
+				AND l.create_time &gt;= #{params.beginTime}
+			</if>
+			<if test="params.endTime != null and params.endTime != ''">
+				AND l.create_time &lt;= #{params.endTime}
+			</if>
+		</where>
+		order by l.create_time desc
+	</select>
+
+	<select id="selectCreditLogById" parameterType="Long" resultMap="CreditLogResult">
+		<include refid="selectCreditLogVo"/>
+		where l.log_id = #{logId}
+	</select>
+
+	<select id="selectCreditLogByUserId" parameterType="Long" resultMap="CreditLogResult">
+		<include refid="selectCreditLogVo"/>
+		where l.user_id = #{userId}
+		order by l.create_time desc
+	</select>
+
+	<insert id="insertCreditLog" parameterType="CreditLog" useGeneratedKeys="true" keyProperty="logId">
+		insert into campus_credit_log(
+			<if test="userId != null">user_id,</if>
+			<if test="changeType != null and changeType != ''">change_type,</if>
+			<if test="scoreChange != null">score_change,</if>
+			<if test="currentScore != null">current_score,</if>
+			<if test="refOrderId != null">ref_order_id,</if>
+			create_time
+		)values(
+			<if test="userId != null">#{userId},</if>
+			<if test="changeType != null and changeType != ''">#{changeType},</if>
+			<if test="scoreChange != null">#{scoreChange},</if>
+			<if test="currentScore != null">#{currentScore},</if>
+			<if test="refOrderId != null">#{refOrderId},</if>
+			sysdate()
+		)
+	</insert>
+
+	<delete id="deleteCreditLogById" parameterType="Long">
+		delete from campus_credit_log where log_id = #{logId}
+	</delete>
+
+	<delete id="deleteCreditLogByIds" parameterType="Long">
+		delete from campus_credit_log where log_id in
+		<foreach collection="array" item="logId" open="(" separator="," close=")">
+			#{logId}
+		</foreach>
+	</delete>
+
+</mapper>

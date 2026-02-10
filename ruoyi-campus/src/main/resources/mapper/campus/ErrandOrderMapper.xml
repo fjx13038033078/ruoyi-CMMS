@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.campus.mapper.ErrandOrderMapper">
+
+	<resultMap type="ErrandOrder" id="ErrandOrderResult">
+		<id     property="orderId"          column="order_id"          />
+		<result property="orderNo"          column="order_no"          />
+		<result property="publisherId"      column="publisher_id"      />
+		<result property="runnerId"         column="runner_id"         />
+		<result property="orderTitle"       column="order_title"       />
+		<result property="orderDesc"        column="order_desc"        />
+		<result property="weightCategory"   column="weight_category"   />
+		<result property="isUrgent"         column="is_urgent"         />
+		<result property="pickupAddress"    column="pickup_address"    />
+		<result property="pickupLng"        column="pickup_lng"        />
+		<result property="pickupLat"        column="pickup_lat"        />
+		<result property="deliveryAddress"  column="delivery_address"  />
+		<result property="deliveryLng"      column="delivery_lng"      />
+		<result property="deliveryLat"      column="delivery_lat"      />
+		<result property="totalDistance"     column="total_distance"    />
+		<result property="suggestedPrice"   column="suggested_price"   />
+		<result property="finalPrice"       column="final_price"       />
+		<result property="orderStatus"      column="order_status"      />
+		<result property="deadlineTime"     column="deadline_time"     />
+		<result property="finishTime"       column="finish_time"       />
+		<result property="createBy"         column="create_by"         />
+		<result property="createTime"       column="create_time"       />
+		<result property="updateTime"       column="update_time"       />
+		<result property="delFlag"          column="del_flag"          />
+		<result property="publisherName"    column="publisher_name"    />
+		<result property="runnerName"       column="runner_name"       />
+	</resultMap>
+
+	<sql id="selectErrandOrderVo">
+		select o.order_id, o.order_no, o.publisher_id, o.runner_id,
+		       o.order_title, o.order_desc, o.weight_category, o.is_urgent,
+		       o.pickup_address, o.pickup_lng, o.pickup_lat,
+		       o.delivery_address, o.delivery_lng, o.delivery_lat,
+		       o.total_distance, o.suggested_price, o.final_price,
+		       o.order_status, o.deadline_time, o.finish_time,
+		       o.create_by, o.create_time, o.update_time, o.del_flag,
+		       u1.nick_name as publisher_name,
+		       u2.nick_name as runner_name
+		from campus_errand_order o
+		left join sys_user u1 on o.publisher_id = u1.user_id
+		left join sys_user u2 on o.runner_id = u2.user_id
+	</sql>
+
+	<select id="selectErrandOrderList" parameterType="ErrandOrder" resultMap="ErrandOrderResult">
+		<include refid="selectErrandOrderVo"/>
+		<where>
+			o.del_flag = '0'
+			<if test="orderNo != null and orderNo != ''">
+				AND o.order_no like concat('%', #{orderNo}, '%')
+			</if>
+			<if test="publisherId != null">
+				AND o.publisher_id = #{publisherId}
+			</if>
+			<if test="runnerId != null">
+				AND o.runner_id = #{runnerId}
+			</if>
+			<if test="orderTitle != null and orderTitle != ''">
+				AND o.order_title like concat('%', #{orderTitle}, '%')
+			</if>
+			<if test="weightCategory != null and weightCategory != ''">
+				AND o.weight_category = #{weightCategory}
+			</if>
+			<if test="isUrgent != null and isUrgent != ''">
+				AND o.is_urgent = #{isUrgent}
+			</if>
+			<if test="orderStatus != null and orderStatus != ''">
+				AND o.order_status = #{orderStatus}
+			</if>
+			<if test="params.beginTime != null and params.beginTime != ''">
+				AND o.create_time &gt;= #{params.beginTime}
+			</if>
+			<if test="params.endTime != null and params.endTime != ''">
+				AND o.create_time &lt;= #{params.endTime}
+			</if>
+		</where>
+		order by o.create_time desc
+	</select>
+
+	<select id="selectErrandOrderById" parameterType="Long" resultMap="ErrandOrderResult">
+		<include refid="selectErrandOrderVo"/>
+		where o.order_id = #{orderId} and o.del_flag = '0'
+	</select>
+
+	<select id="selectErrandOrderByOrderNo" parameterType="String" resultMap="ErrandOrderResult">
+		<include refid="selectErrandOrderVo"/>
+		where o.order_no = #{orderNo} and o.del_flag = '0'
+	</select>
+
+	<select id="checkOrderNoUnique" parameterType="String" resultMap="ErrandOrderResult">
+		select o.order_id, o.order_no
+		from campus_errand_order o
+		where o.order_no = #{orderNo} and o.del_flag = '0' limit 1
+	</select>
+
+	<insert id="insertErrandOrder" parameterType="ErrandOrder" useGeneratedKeys="true" keyProperty="orderId">
+		insert into campus_errand_order(
+			<if test="orderNo != null and orderNo != ''">order_no,</if>
+			<if test="publisherId != null">publisher_id,</if>
+			<if test="runnerId != null">runner_id,</if>
+			<if test="orderTitle != null and orderTitle != ''">order_title,</if>
+			<if test="orderDesc != null and orderDesc != ''">order_desc,</if>
+			<if test="weightCategory != null and weightCategory != ''">weight_category,</if>
+			<if test="isUrgent != null and isUrgent != ''">is_urgent,</if>
+			<if test="pickupAddress != null and pickupAddress != ''">pickup_address,</if>
+			<if test="pickupLng != null">pickup_lng,</if>
+			<if test="pickupLat != null">pickup_lat,</if>
+			<if test="deliveryAddress != null and deliveryAddress != ''">delivery_address,</if>
+			<if test="deliveryLng != null">delivery_lng,</if>
+			<if test="deliveryLat != null">delivery_lat,</if>
+			<if test="totalDistance != null">total_distance,</if>
+			<if test="suggestedPrice != null">suggested_price,</if>
+			<if test="finalPrice != null">final_price,</if>
+			<if test="orderStatus != null and orderStatus != ''">order_status,</if>
+			<if test="deadlineTime != null">deadline_time,</if>
+			<if test="createBy != null and createBy != ''">create_by,</if>
+			create_time
+		)values(
+			<if test="orderNo != null and orderNo != ''">#{orderNo},</if>
+			<if test="publisherId != null">#{publisherId},</if>
+			<if test="runnerId != null">#{runnerId},</if>
+			<if test="orderTitle != null and orderTitle != ''">#{orderTitle},</if>
+			<if test="orderDesc != null and orderDesc != ''">#{orderDesc},</if>
+			<if test="weightCategory != null and weightCategory != ''">#{weightCategory},</if>
+			<if test="isUrgent != null and isUrgent != ''">#{isUrgent},</if>
+			<if test="pickupAddress != null and pickupAddress != ''">#{pickupAddress},</if>
+			<if test="pickupLng != null">#{pickupLng},</if>
+			<if test="pickupLat != null">#{pickupLat},</if>
+			<if test="deliveryAddress != null and deliveryAddress != ''">#{deliveryAddress},</if>
+			<if test="deliveryLng != null">#{deliveryLng},</if>
+			<if test="deliveryLat != null">#{deliveryLat},</if>
+			<if test="totalDistance != null">#{totalDistance},</if>
+			<if test="suggestedPrice != null">#{suggestedPrice},</if>
+			<if test="finalPrice != null">#{finalPrice},</if>
+			<if test="orderStatus != null and orderStatus != ''">#{orderStatus},</if>
+			<if test="deadlineTime != null">#{deadlineTime},</if>
+			<if test="createBy != null and createBy != ''">#{createBy},</if>
+			sysdate()
+		)
+	</insert>
+
+	<update id="updateErrandOrder" parameterType="ErrandOrder">
+		update campus_errand_order
+		<set>
+			<if test="runnerId != null">runner_id = #{runnerId},</if>
+			<if test="orderTitle != null and orderTitle != ''">order_title = #{orderTitle},</if>
+			<if test="orderDesc != null">order_desc = #{orderDesc},</if>
+			<if test="weightCategory != null and weightCategory != ''">weight_category = #{weightCategory},</if>
+			<if test="isUrgent != null and isUrgent != ''">is_urgent = #{isUrgent},</if>
+			<if test="pickupAddress != null and pickupAddress != ''">pickup_address = #{pickupAddress},</if>
+			<if test="pickupLng != null">pickup_lng = #{pickupLng},</if>
+			<if test="pickupLat != null">pickup_lat = #{pickupLat},</if>
+			<if test="deliveryAddress != null and deliveryAddress != ''">delivery_address = #{deliveryAddress},</if>
+			<if test="deliveryLng != null">delivery_lng = #{deliveryLng},</if>
+			<if test="deliveryLat != null">delivery_lat = #{deliveryLat},</if>
+			<if test="totalDistance != null">total_distance = #{totalDistance},</if>
+			<if test="suggestedPrice != null">suggested_price = #{suggestedPrice},</if>
+			<if test="finalPrice != null">final_price = #{finalPrice},</if>
+			<if test="orderStatus != null and orderStatus != ''">order_status = #{orderStatus},</if>
+			<if test="deadlineTime != null">deadline_time = #{deadlineTime},</if>
+			<if test="finishTime != null">finish_time = #{finishTime},</if>
+			<if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+			update_time = sysdate()
+		</set>
+		where order_id = #{orderId}
+	</update>
+
+	<delete id="deleteErrandOrderById" parameterType="Long">
+		update campus_errand_order set del_flag = '2' where order_id = #{orderId}
+	</delete>
+
+	<delete id="deleteErrandOrderByIds" parameterType="Long">
+		update campus_errand_order set del_flag = '2' where order_id in
+		<foreach collection="array" item="orderId" open="(" separator="," close=")">
+			#{orderId}
+		</foreach>
+	</delete>
+
+</mapper>

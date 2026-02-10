@@ -49,6 +49,13 @@
             <artifactId>ruoyi-framework</artifactId>
         </dependency>
 
+        <!-- 校园跑腿模块-->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-campus</artifactId>
+            <version>${ruoyi.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
