@@ -9,9 +9,11 @@ import com.ruoyi.common.utils.uuid.IdUtils;
 import com.ruoyi.campus.domain.CreditLog;
 import com.ruoyi.campus.domain.ErrandOrder;
 import com.ruoyi.campus.domain.StudentProfile;
+import com.ruoyi.campus.domain.dto.OrderRecommendationDTO;
 import com.ruoyi.campus.mapper.CreditLogMapper;
 import com.ruoyi.campus.mapper.ErrandOrderMapper;
 import com.ruoyi.campus.mapper.StudentProfileMapper;
+import com.ruoyi.campus.match.OrderMatchAlgorithm;
 import com.ruoyi.campus.service.IErrandOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,9 @@ public class ErrandOrderServiceImpl implements IErrandOrderService
 
     @Autowired
     private CreditLogMapper creditLogMapper;
+
+    @Autowired
+    private OrderMatchAlgorithm orderMatchAlgorithm;
 
     /**
      * 查询跑腿订单列表
@@ -294,6 +299,39 @@ public class ErrandOrderServiceImpl implements IErrandOrderService
             }
         }
         return rows;
+    }
+
+    // ==================== 智能推荐 ====================
+
+    /**
+     * 智能推荐订单列表
+     * 委托 OrderMatchAlgorithm 进行匹配度计算与排序
+     *
+     * @param runnerId  跑腿员用户ID
+     * @param runnerLat 跑腿员当前纬度
+     * @param runnerLng 跑腿员当前经度
+     * @return 推荐订单列表(按匹配分降序)
+     */
+    @Override
+    public List<OrderRecommendationDTO> selectRecommendedOrders(Long runnerId, Double runnerLat, Double runnerLng)
+    {
+        // 1. 校验跑腿员身份
+        StudentProfile runner = studentProfileMapper.selectStudentProfileByUserId(runnerId);
+        if (StringUtils.isNull(runner) || !"1".equals(runner.getIsRunner()))
+        {
+            throw new ServiceException("您没有接单权限，请先完成学生认证");
+        }
+
+        // 2. 查询所有"待接单"状态的订单
+        ErrandOrder query = new ErrandOrder();
+        query.setOrderStatus("0");
+        List<ErrandOrder> pendingOrders = errandOrderMapper.selectErrandOrderList(query);
+
+        // 3. 获取跑腿员信誉分
+        int creditScore = runner.getCreditScore() != null ? runner.getCreditScore() : 0;
+
+        // 4. 调用匹配算法计算并排序
+        return orderMatchAlgorithm.calculate(pendingOrders, runnerId, runnerLat, runnerLng, creditScore);
     }
 
 }

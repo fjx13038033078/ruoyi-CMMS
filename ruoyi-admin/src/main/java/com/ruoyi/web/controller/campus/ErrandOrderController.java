@@ -19,6 +19,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.campus.domain.ErrandOrder;
+import com.ruoyi.campus.domain.dto.OrderRecommendationDTO;
 import com.ruoyi.campus.service.IErrandOrderService;
 
 /**
@@ -76,6 +77,23 @@ public class ErrandOrderController extends BaseController
         startPage();
         List<ErrandOrder> list = errandOrderService.selectErrandOrderList(errandOrder);
         return getDataTable(list);
+    }
+
+    /**
+     * 智能推荐订单列表
+     * 根据跑腿员当前位置，综合距离、时间紧迫度、信誉分计算匹配度排序
+     *
+     * @param runnerLat 跑腿员当前纬度
+     * @param runnerLng 跑腿员当前经度
+     * @return 推荐订单列表
+     */
+    @PreAuthorize("@ss.hasPermi('campus:order:list')")
+    @GetMapping("/recommend")
+    public AjaxResult recommendOrders(Double runnerLat, Double runnerLng)
+    {
+        Long runnerId = SecurityUtils.getUserId();
+        List<OrderRecommendationDTO> list = errandOrderService.selectRecommendedOrders(runnerId, runnerLat, runnerLng);
+        return success(list);
     }
 
     /**

@@ -29,15 +29,13 @@ public class ErrandOrder extends BaseEntity
     /** 订单ID */
     private Long orderId;
 
-    /** 订单编号(唯一业务号) */
+    /** 订单编号(唯一业务号, 由后端自动生成) */
     @Excel(name = "订单编号")
-    @NotBlank(message = "订单编号不能为空")
     @Size(min = 0, max = 32, message = "订单编号长度不能超过32个字符")
     private String orderNo;
 
-    /** 发布者ID(关联sys_user) */
+    /** 发布者ID(关联sys_user, 由后端自动设置) */
     @Excel(name = "发布者ID")
-    @NotNull(message = "发布者ID不能为空")
     private Long publisherId;
 
     /** 接单跑腿员ID(关联sys_user) */

@@ -2,6 +2,7 @@ package com.ruoyi.campus.service;
 
 import java.util.List;
 import com.ruoyi.campus.domain.ErrandOrder;
+import com.ruoyi.campus.domain.dto.OrderRecommendationDTO;
 
 /**
  * 校园跑腿订单 服务层
@@ -98,4 +99,15 @@ public interface IErrandOrderService
      * @return 结果
      */
     public int cancelOrder(Long orderId);
+
+    /**
+     * 智能推荐订单列表
+     * 根据跑腿员位置、订单紧迫度、跑腿员信誉分综合计算匹配度，按匹配度降序排列
+     *
+     * @param runnerId  跑腿员用户ID
+     * @param runnerLat 跑腿员当前纬度
+     * @param runnerLng 跑腿员当前经度
+     * @return 推荐订单列表(按匹配分降序)
+     */
+    public List<OrderRecommendationDTO> selectRecommendedOrders(Long runnerId, Double runnerLat, Double runnerLng);
 }
