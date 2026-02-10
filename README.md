@@ -1,5 +1,6 @@
 
-# Demo
+# CMMS(Campus errand matching and management system)
+校园跑腿任务匹配与管理系统
 
 ## 说明
 
