@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch && !isCommonUser" label-width="68px">
       <el-form-item label="用户昵称" prop="userName">
         <el-input
           v-model="queryParams.userName"
@@ -250,6 +250,13 @@ export default {
         ]
       }
     };
+  },
+  computed: {
+    /** 判断当前用户是否为普通用户角色 */
+    isCommonUser() {
+      var roles = this.$store.state.user.roles || [];
+      return roles.length === 1 && roles.indexOf("common") !== -1;
+    }
   },
   created() {
     this.getList();

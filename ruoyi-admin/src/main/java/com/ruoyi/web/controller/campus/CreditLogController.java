@@ -33,11 +33,17 @@ public class CreditLogController extends BaseController
 
     /**
      * 查询信誉变更记录列表
+     * 普通用户(common)仅能查看本人记录，其余角色查看全部
      */
     @PreAuthorize("@ss.hasPermi('campus:credit:list')")
     @GetMapping("/list")
     public TableDataInfo list(CreditLog creditLog)
     {
+        // 普通用户只能查看自己的信誉记录
+        if (SecurityUtils.hasRole("common"))
+        {
+            creditLog.setUserId(SecurityUtils.getUserId());
+        }
         startPage();
         List<CreditLog> list = creditLogService.selectCreditLogList(creditLog);
         return getDataTable(list);
@@ -61,6 +67,10 @@ public class CreditLogController extends BaseController
     @PostMapping("/export")
     public void export(HttpServletResponse response, CreditLog creditLog)
     {
+        if (SecurityUtils.hasRole("common"))
+        {
+            creditLog.setUserId(SecurityUtils.getUserId());
+        }
         List<CreditLog> list = creditLogService.selectCreditLogList(creditLog);
         ExcelUtil<CreditLog> util = new ExcelUtil<CreditLog>(CreditLog.class);
         util.exportExcel(response, list, "信誉变更记录数据");

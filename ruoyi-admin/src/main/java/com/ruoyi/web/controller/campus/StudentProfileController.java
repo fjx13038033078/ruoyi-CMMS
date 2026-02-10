@@ -35,11 +35,17 @@ public class StudentProfileController extends BaseController
 
     /**
      * 查询校园用户信息列表
+     * 普通用户(common)仅能查看本人信息，其余角色查看全部
      */
     @PreAuthorize("@ss.hasPermi('campus:profile:list')")
     @GetMapping("/list")
     public TableDataInfo list(StudentProfile studentProfile)
     {
+        // 普通用户只能查看自己的学生信息
+        if (SecurityUtils.hasRole("common"))
+        {
+            studentProfile.setUserId(SecurityUtils.getUserId());
+        }
         startPage();
         List<StudentProfile> list = studentProfileService.selectStudentProfileList(studentProfile);
         return getDataTable(list);
@@ -53,6 +59,10 @@ public class StudentProfileController extends BaseController
     @PostMapping("/export")
     public void export(HttpServletResponse response, StudentProfile studentProfile)
     {
+        if (SecurityUtils.hasRole("common"))
+        {
+            studentProfile.setUserId(SecurityUtils.getUserId());
+        }
         List<StudentProfile> list = studentProfileService.selectStudentProfileList(studentProfile);
         ExcelUtil<StudentProfile> util = new ExcelUtil<StudentProfile>(StudentProfile.class);
         util.exportExcel(response, list, "校园用户信息数据");

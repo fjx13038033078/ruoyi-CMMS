@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="80px">
-      <el-form-item label="用户ID" prop="userId">
+      <el-form-item label="用户ID" prop="userId" v-if="!isCommonUser">
         <el-input
           v-model="queryParams.userId"
           placeholder="请输入用户ID"
@@ -128,6 +128,13 @@ export default {
         changeType: undefined
       }
     };
+  },
+  computed: {
+    /** 判断当前用户是否为普通用户角色 */
+    isCommonUser() {
+      var roles = this.$store.state.user.roles || [];
+      return roles.length === 1 && roles.indexOf("common") !== -1;
+    }
   },
   created() {
     this.getList();
