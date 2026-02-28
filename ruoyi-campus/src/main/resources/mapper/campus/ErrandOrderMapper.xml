@@ -182,4 +182,69 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		</foreach>
 	</delete>
 
+	<!-- ==================== 统计查询 ==================== -->
+
+	<select id="countByStatus" resultType="java.util.HashMap">
+		select order_status as status, count(*) as count
+		from campus_errand_order where del_flag = '0'
+		group by order_status
+	</select>
+
+	<select id="countByStatusForUser" resultType="java.util.HashMap">
+		select order_status as status, count(*) as count
+		from campus_errand_order
+		where del_flag = '0' and (publisher_id = #{userId} or runner_id = #{userId})
+		group by order_status
+	</select>
+
+	<select id="countTodayOrders" resultType="Integer">
+		select count(*) from campus_errand_order
+		where del_flag = '0' and date(create_time) = curdate()
+	</select>
+
+	<select id="countTodayOrdersForUser" resultType="Integer">
+		select count(*) from campus_errand_order
+		where del_flag = '0' and date(create_time) = curdate()
+		  and (publisher_id = #{userId} or runner_id = #{userId})
+	</select>
+
+	<select id="countTodayCompleted" resultType="Integer">
+		select count(*) from campus_errand_order
+		where del_flag = '0' and order_status = '3' and date(finish_time) = curdate()
+	</select>
+
+	<select id="countTodayCompletedForUser" resultType="Integer">
+		select count(*) from campus_errand_order
+		where del_flag = '0' and order_status = '3' and date(finish_time) = curdate()
+		  and (publisher_id = #{userId} or runner_id = #{userId})
+	</select>
+
+	<select id="sumAmount" resultType="java.util.HashMap">
+		select ifnull(sum(suggested_price), 0) as totalAmount
+		from campus_errand_order where del_flag = '0'
+	</select>
+
+	<select id="sumAmountForUser" resultType="java.util.HashMap">
+		select ifnull(sum(suggested_price), 0) as totalAmount
+		from campus_errand_order
+		where del_flag = '0' and (publisher_id = #{userId} or runner_id = #{userId})
+	</select>
+
+	<select id="dailyOrderTrend" resultType="java.util.HashMap">
+		select date(create_time) as date, count(*) as count
+		from campus_errand_order
+		where del_flag = '0' and create_time >= date_sub(curdate(), interval 6 day)
+		group by date(create_time)
+		order by date(create_time)
+	</select>
+
+	<select id="dailyOrderTrendForUser" resultType="java.util.HashMap">
+		select date(create_time) as date, count(*) as count
+		from campus_errand_order
+		where del_flag = '0' and create_time >= date_sub(curdate(), interval 6 day)
+		  and (publisher_id = #{userId} or runner_id = #{userId})
+		group by date(create_time)
+		order by date(create_time)
+	</select>
+
 </mapper>

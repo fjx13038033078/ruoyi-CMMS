@@ -1,7 +1,9 @@
 package com.ruoyi.campus.mapper;
 
 import java.util.List;
+import java.util.Map;
 import com.ruoyi.campus.domain.ErrandOrder;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 校园跑腿订单 数据层
@@ -73,4 +75,34 @@ public interface ErrandOrderMapper
      * @return 结果
      */
     public ErrandOrder checkOrderNoUnique(String orderNo);
+
+    /** 按状态统计订单数量(全局) */
+    public List<Map<String, Object>> countByStatus();
+
+    /** 按状态统计指定用户相关的订单数量(发布者或跑腿员) */
+    public List<Map<String, Object>> countByStatusForUser(@Param("userId") Long userId);
+
+    /** 今日新增订单数(全局) */
+    public Integer countTodayOrders();
+
+    /** 今日新增订单数(指定用户) */
+    public Integer countTodayOrdersForUser(@Param("userId") Long userId);
+
+    /** 今日完成订单数(全局) */
+    public Integer countTodayCompleted();
+
+    /** 今日完成订单数(指定用户) */
+    public Integer countTodayCompletedForUser(@Param("userId") Long userId);
+
+    /** 订单总金额(全局) */
+    public Map<String, Object> sumAmount();
+
+    /** 订单总金额(指定用户) */
+    public Map<String, Object> sumAmountForUser(@Param("userId") Long userId);
+
+    /** 近7天每日订单量(全局) */
+    public List<Map<String, Object>> dailyOrderTrend();
+
+    /** 近7天每日订单量(指定用户) */
+    public List<Map<String, Object>> dailyOrderTrendForUser(@Param("userId") Long userId);
 }

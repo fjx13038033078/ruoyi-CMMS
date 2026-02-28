@@ -91,4 +91,28 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		</foreach>
 	</delete>
 
+	<!-- ==================== 统计查询 ==================== -->
+
+	<select id="dailyCreditTrend" resultType="java.util.HashMap">
+		select date(create_time) as date,
+		       sum(case when change_type = 'COMPLETE' then 1 else 0 end) as complete,
+		       sum(case when change_type = 'LATE' then 1 else 0 end) as late,
+		       sum(case when change_type = 'VIOLATION' then 1 else 0 end) as violation
+		from campus_credit_log
+		where create_time >= date_sub(curdate(), interval 6 day)
+		group by date(create_time)
+		order by date(create_time)
+	</select>
+
+	<select id="dailyCreditTrendForUser" resultType="java.util.HashMap">
+		select date(create_time) as date,
+		       sum(case when change_type = 'COMPLETE' then 1 else 0 end) as complete,
+		       sum(case when change_type = 'LATE' then 1 else 0 end) as late,
+		       sum(case when change_type = 'VIOLATION' then 1 else 0 end) as violation
+		from campus_credit_log
+		where create_time >= date_sub(curdate(), interval 6 day) and user_id = #{userId}
+		group by date(create_time)
+		order by date(create_time)
+	</select>
+
 </mapper>

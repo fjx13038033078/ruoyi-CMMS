@@ -48,6 +48,7 @@
           plain
           icon="el-icon-plus"
           size="mini"
+          :disabled="!canAdd"
           @click="handleAdd"
           v-hasPermi="['campus:profile:add']"
         >新增</el-button>
@@ -212,7 +213,7 @@
 </template>
 
 <script>
-import { listProfile, getProfile, addProfile, updateProfile, delProfile, auditProfile } from "@/api/campus/profile";
+import { listProfile, getProfile, getMyProfile, addProfile, updateProfile, delProfile, auditProfile } from "@/api/campus/profile";
 
 export default {
   name: "Profile",
@@ -228,7 +229,7 @@ export default {
       profileList: [],
       title: "",
       open: false,
-      // 拒绝弹窗
+      hasProfile: false,
       rejectOpen: false,
       rejectForm: {
         profileId: undefined,
@@ -252,16 +253,29 @@ export default {
     };
   },
   computed: {
-    /** 判断当前用户是否为普通用户角色 */
     isCommonUser() {
       var roles = this.$store.state.user.roles || [];
       return roles.length === 1 && roles.indexOf("common") !== -1;
+    },
+    /** 普通用户已有学生信息时不允许新增 */
+    canAdd() {
+      if (this.isCommonUser && this.hasProfile) {
+        return false;
+      }
+      return true;
     }
   },
   created() {
     this.getList();
+    this.checkMyProfile();
   },
   methods: {
+    /** 检查当前用户是否已有学生信息 */
+    checkMyProfile() {
+      getMyProfile().then(function(res) {
+        this.hasProfile = res.data != null;
+      }.bind(this));
+    },
     /** 查询列表 */
     getList() {
       this.loading = true;
@@ -302,8 +316,11 @@ export default {
       this.multiple = !selection.length;
     },
     handleAdd() {
+      if (!this.canAdd) {
+        this.$modal.msgWarning("您已提交过学生信息，无法重复新增");
+        return;
+      }
       this.reset();
-      // 自动填入当前登录用户的ID和昵称，不可修改
       this.form.userId = this.$store.state.user.id;
       this.form.userName = this.$store.getters.name;
       this.open = true;
@@ -332,6 +349,7 @@ export default {
             addProfile(self.form).then(function() {
               self.$modal.msgSuccess("新增成功");
               self.open = false;
+              self.hasProfile = true;
               self.getList();
             });
           }
@@ -373,6 +391,7 @@ export default {
         return delProfile(profileIds);
       }).then(function() {
         self.getList();
+        self.checkMyProfile();
         self.$modal.msgSuccess("删除成功");
       }).catch(function() {});
     },

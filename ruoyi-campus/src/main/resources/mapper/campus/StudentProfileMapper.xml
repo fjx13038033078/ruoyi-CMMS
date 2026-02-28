@@ -117,4 +117,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		</foreach>
 	</delete>
 
+	<!-- ==================== 统计查询 ==================== -->
+
+	<select id="countProfileStats" resultType="java.util.HashMap">
+		select
+		    count(*) as totalStudents,
+		    sum(case when is_runner = '1' then 1 else 0 end) as totalRunners
+		from campus_student_profile
+		where auth_status = '1'
+	</select>
+
+	<select id="avgCreditScore" resultType="java.util.HashMap">
+		select ifnull(round(avg(credit_score), 1), 0) as avgScore
+		from campus_student_profile
+		where auth_status = '1'
+	</select>
+
 </mapper>

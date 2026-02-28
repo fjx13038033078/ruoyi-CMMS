@@ -1,7 +1,9 @@
 package com.ruoyi.campus.mapper;
 
 import java.util.List;
+import java.util.Map;
 import com.ruoyi.campus.domain.CreditLog;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 用户信誉变更记录 数据层
@@ -57,4 +59,10 @@ public interface CreditLogMapper
      * @return 结果
      */
     public int deleteCreditLogByIds(Long[] logIds);
+
+    /** 近7天每日信誉变更统计(全局) */
+    public List<Map<String, Object>> dailyCreditTrend();
+
+    /** 近7天每日信誉变更统计(指定用户) */
+    public List<Map<String, Object>> dailyCreditTrendForUser(@Param("userId") Long userId);
 }

@@ -1,6 +1,7 @@
 package com.ruoyi.campus.mapper;
 
 import java.util.List;
+import java.util.Map;
 import com.ruoyi.campus.domain.StudentProfile;
 
 /**
@@ -81,4 +82,10 @@ public interface StudentProfileMapper
      * @return 结果
      */
     public StudentProfile checkUserIdUnique(Long userId);
+
+    /** 统计认证学生数和跑腿员数 */
+    public Map<String, Object> countProfileStats();
+
+    /** 统计平均信誉分 */
+    public Map<String, Object> avgCreditScore();
 }
