@@ -5,9 +5,12 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+import lombok.Data;
+
 /**
  * 首页仪表盘统计数据 DTO
  */
+@Data
 public class DashboardStatsDTO implements Serializable
 {
     private static final long serialVersionUID = 1L;
@@ -42,13 +45,13 @@ public class DashboardStatsDTO implements Serializable
     /** 平均信誉分 */
     private BigDecimal avgCreditScore;
 
-    /** 近7天每日订单量 [{date:'2026-02-04', count:5}, ...] */
+    /** 近7天每日订单量 */
     private List<Map<String, Object>> dailyOrderTrend;
 
-    /** 订单状态分布 [{status:'0', count:10}, ...] */
+    /** 订单状态分布 */
     private List<Map<String, Object>> statusDistribution;
 
-    /** 近7天信誉变更统计 [{date:'2026-02-04', complete:3, late:1, violation:0}, ...] */
+    /** 近7天信誉变更统计 */
     private List<Map<String, Object>> dailyCreditTrend;
 
     /** 今日完成订单数 */
@@ -56,154 +59,4 @@ public class DashboardStatsDTO implements Serializable
 
     /** 完成率(已完成 / (已完成 + 已取消)) */
     private BigDecimal completionRate;
-
-    public Integer getTotalOrders()
-    {
-        return totalOrders;
-    }
-
-    public void setTotalOrders(Integer totalOrders)
-    {
-        this.totalOrders = totalOrders;
-    }
-
-    public Integer getPendingOrders()
-    {
-        return pendingOrders;
-    }
-
-    public void setPendingOrders(Integer pendingOrders)
-    {
-        this.pendingOrders = pendingOrders;
-    }
-
-    public Integer getActiveOrders()
-    {
-        return activeOrders;
-    }
-
-    public void setActiveOrders(Integer activeOrders)
-    {
-        this.activeOrders = activeOrders;
-    }
-
-    public Integer getCompletedOrders()
-    {
-        return completedOrders;
-    }
-
-    public void setCompletedOrders(Integer completedOrders)
-    {
-        this.completedOrders = completedOrders;
-    }
-
-    public Integer getCancelledOrders()
-    {
-        return cancelledOrders;
-    }
-
-    public void setCancelledOrders(Integer cancelledOrders)
-    {
-        this.cancelledOrders = cancelledOrders;
-    }
-
-    public Integer getTodayOrders()
-    {
-        return todayOrders;
-    }
-
-    public void setTodayOrders(Integer todayOrders)
-    {
-        this.todayOrders = todayOrders;
-    }
-
-    public BigDecimal getTotalAmount()
-    {
-        return totalAmount;
-    }
-
-    public void setTotalAmount(BigDecimal totalAmount)
-    {
-        this.totalAmount = totalAmount;
-    }
-
-    public Integer getTotalStudents()
-    {
-        return totalStudents;
-    }
-
-    public void setTotalStudents(Integer totalStudents)
-    {
-        this.totalStudents = totalStudents;
-    }
-
-    public Integer getTotalRunners()
-    {
-        return totalRunners;
-    }
-
-    public void setTotalRunners(Integer totalRunners)
-    {
-        this.totalRunners = totalRunners;
-    }
-
-    public BigDecimal getAvgCreditScore()
-    {
-        return avgCreditScore;
-    }
-
-    public void setAvgCreditScore(BigDecimal avgCreditScore)
-    {
-        this.avgCreditScore = avgCreditScore;
-    }
-
-    public List<Map<String, Object>> getDailyOrderTrend()
-    {
-        return dailyOrderTrend;
-    }
-
-    public void setDailyOrderTrend(List<Map<String, Object>> dailyOrderTrend)
-    {
-        this.dailyOrderTrend = dailyOrderTrend;
-    }
-
-    public List<Map<String, Object>> getStatusDistribution()
-    {
-        return statusDistribution;
-    }
-
-    public void setStatusDistribution(List<Map<String, Object>> statusDistribution)
-    {
-        this.statusDistribution = statusDistribution;
-    }
-
-    public List<Map<String, Object>> getDailyCreditTrend()
-    {
-        return dailyCreditTrend;
-    }
-
-    public void setDailyCreditTrend(List<Map<String, Object>> dailyCreditTrend)
-    {
-        this.dailyCreditTrend = dailyCreditTrend;
-    }
-
-    public Integer getTodayCompleted()
-    {
-        return todayCompleted;
-    }
-
-    public void setTodayCompleted(Integer todayCompleted)
-    {
-        this.todayCompleted = todayCompleted;
-    }
-
-    public BigDecimal getCompletionRate()
-    {
-        return completionRate;
-    }
-
-    public void setCompletionRate(BigDecimal completionRate)
-    {
-        this.completionRate = completionRate;
-    }
 }
