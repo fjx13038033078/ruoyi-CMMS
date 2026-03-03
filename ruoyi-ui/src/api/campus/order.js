@@ -70,6 +70,15 @@ export function recommendOrders(query) {
   })
 }
 
+// 计算建议跑腿费用
+export function calcPrice(query) {
+  return request({
+    url: '/campus/order/calcPrice',
+    method: 'get',
+    params: query
+  })
+}
+
 // 接单
 export function acceptOrder(orderId) {
   return request({

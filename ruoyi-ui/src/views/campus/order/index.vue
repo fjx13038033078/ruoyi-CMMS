@@ -264,10 +264,30 @@
 
         <!-- 价格与时间 -->
         <el-divider content-position="left">费用与时间</el-divider>
+        <el-row v-if="routeDistance">
+          <el-col :span="24">
+            <el-alert
+              :title="'路径规划距离：' + (routeDistance / 1000).toFixed(2) + ' 公里（步行），建议价格已自动生成'"
+              type="success"
+              :closable="false"
+              show-icon
+              style="margin-bottom: 12px"
+            />
+          </el-col>
+        </el-row>
         <el-row>
           <el-col :span="12">
             <el-form-item label="建议价格" prop="suggestedPrice">
-              <el-input-number v-model="form.suggestedPrice" :precision="2" :min="0" controls-position="right" style="width: 100%" />
+              <el-input-number
+                v-model="form.suggestedPrice"
+                :precision="2"
+                :min="0"
+                controls-position="right"
+                :disabled="priceLoading"
+                style="width: 100%"
+              />
+              <div v-if="priceLoading" style="font-size: 12px; color: #909399;">正在计算建议价格...</div>
+              <div v-else-if="routeDistance" style="font-size: 12px; color: #67c23a;">算法自动生成，您也可以手动调整</div>
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -335,7 +355,7 @@
 </template>
 
 <script>
-import { listOrder, getOrder, addOrder, updateOrder, delOrder } from "@/api/campus/order";
+import { listOrder, getOrder, addOrder, updateOrder, delOrder, calcPrice } from "@/api/campus/order";
 import MapLocationSelector from "@/components/MapLocationSelector";
 
 export default {
@@ -376,6 +396,10 @@ export default {
       },
       // 表单参数
       form: {},
+      // 路径距离(米)
+      routeDistance: null,
+      // 是否正在计算价格
+      priceLoading: false,
       // 表单校验
       rules: {
         orderTitle: [
@@ -395,6 +419,14 @@ export default {
         ]
       }
     };
+  },
+  watch: {
+    'form.weightCategory': function() {
+      if (this.routeDistance) { this.fetchSuggestedPrice(); }
+    },
+    'form.isUrgent': function() {
+      if (this.routeDistance) { this.fetchSuggestedPrice(); }
+    }
   },
   created() {
     this.getList();
@@ -428,9 +460,12 @@ export default {
         deliveryAddress: undefined,
         deliveryLng: undefined,
         deliveryLat: undefined,
+        totalDistance: undefined,
         suggestedPrice: undefined,
         deadlineTime: undefined
       };
+      this.routeDistance = null;
+      this.priceLoading = false;
       this.resetForm("form");
     },
     /** 搜索按钮操作 */
@@ -513,12 +548,56 @@ export default {
       this.form.pickupAddress = location.address;
       this.form.pickupLng = location.lng;
       this.form.pickupLat = location.lat;
+      this.tryCalcRoute();
     },
     /** 送达点地图选点回调 */
     handleDeliverySelect(location) {
       this.form.deliveryAddress = location.address;
       this.form.deliveryLng = location.lng;
       this.form.deliveryLat = location.lat;
+      this.tryCalcRoute();
+    },
+    /** 当取货点和送达点都已选定时，调用高德步行路径规划获取真实路径距离 */
+    tryCalcRoute() {
+      var f = this.form;
+      if (!f.pickupLng || !f.pickupLat || !f.deliveryLng || !f.deliveryLat) {
+        return;
+      }
+      var self = this;
+      if (!window.AMap) {
+        return;
+      }
+      AMap.plugin('AMap.Walking', function() {
+        var walking = new AMap.Walking();
+        var origin = [f.pickupLng, f.pickupLat];
+        var destination = [f.deliveryLng, f.deliveryLat];
+        walking.search(origin, destination, function(status, result) {
+          if (status === 'complete' && result.routes && result.routes.length > 0) {
+            var meters = result.routes[0].distance;
+            self.routeDistance = meters;
+            self.form.totalDistance = meters;
+            self.fetchSuggestedPrice();
+          }
+        });
+      });
+    },
+    /** 调用后端定价接口获取建议价格 */
+    fetchSuggestedPrice() {
+      if (!this.routeDistance || this.routeDistance <= 0) {
+        return;
+      }
+      this.priceLoading = true;
+      var self = this;
+      calcPrice({
+        distanceMeters: this.routeDistance,
+        weightCategory: this.form.weightCategory || 'SMALL',
+        isUrgent: this.form.isUrgent || '0'
+      }).then(function(res) {
+        self.form.suggestedPrice = parseFloat(res.data);
+        self.priceLoading = false;
+      }).catch(function() {
+        self.priceLoading = false;
+      });
     }
   }
 };

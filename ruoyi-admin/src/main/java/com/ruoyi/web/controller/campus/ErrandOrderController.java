@@ -20,6 +20,7 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.campus.domain.ErrandOrder;
 import com.ruoyi.campus.domain.dto.OrderRecommendationDTO;
+import com.ruoyi.campus.match.PricingAlgorithm;
 import com.ruoyi.campus.service.IErrandOrderService;
 
 /**
@@ -33,6 +34,9 @@ public class ErrandOrderController extends BaseController
 {
     @Autowired
     private IErrandOrderService errandOrderService;
+
+    @Autowired
+    private PricingAlgorithm pricingAlgorithm;
 
     /**
      * 查询跑腿订单列表
@@ -94,6 +98,23 @@ public class ErrandOrderController extends BaseController
         Long runnerId = SecurityUtils.getUserId();
         List<OrderRecommendationDTO> list = errandOrderService.selectRecommendedOrders(runnerId, runnerLat, runnerLng);
         return success(list);
+    }
+
+    /**
+     * 根据路径距离、物品重量、是否加急，计算建议跑腿费用
+     *
+     * @param distanceMeters 路径规划距离(米)
+     * @param weightCategory 物品重量类型 SMALL/MEDIUM/LARGE
+     * @param isUrgent       是否加急 0/1
+     */
+    @GetMapping("/calcPrice")
+    public AjaxResult calcPrice(Double distanceMeters, String weightCategory, String isUrgent)
+    {
+        if (distanceMeters == null || distanceMeters <= 0)
+        {
+            return error("路径距离无效");
+        }
+        return success(pricingAlgorithm.calculate(distanceMeters, weightCategory, isUrgent));
     }
 
     /**
